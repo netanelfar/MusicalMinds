@@ -9,6 +9,8 @@ public class KeyControl : MonoBehaviour
     private Dictionary<string, Coroutine> activeCoroutines = new Dictionary<string, Coroutine>();
     Color customGreen = new Color(0.3f, 1f, 0.4f, 1f); // green
 
+   
+
 
     public void Press(string note)
     {
@@ -33,6 +35,16 @@ public class KeyControl : MonoBehaviour
         {
             Debug.LogWarning($"[KeyControl] No GameObject found with name: {note}");
         }
+
+        if (GameSettings.CurrentGameMode == GameSettings.GameMode.SingleNoteRecognition)
+        {
+            var recognizer = FindObjectOfType<SingleNoteRecognitionManager>();
+            if (recognizer != null)
+            {
+                recognizer.OnPlayerPressedNote(note);
+            }
+        }
+
     }
 
     private IEnumerator FlashAndRestore(Image image, string note, float duration)
