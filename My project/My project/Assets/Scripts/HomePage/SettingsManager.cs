@@ -3,8 +3,8 @@ using UnityEngine.UI;
 
 public class SettingsManager : MonoBehaviour
 {
-    public GameObject settingsPNL; //Main options pannel
-    public GameObject OptionsPNL;
+    public GameObject settingsPNL; //Main manue options pannel
+    public GameObject OptionsPNL; // Option main view
     public GameObject pianoSizeOptions;
     public GameObject screenSizeOptions;
     public GameObject UserPNL;
@@ -62,6 +62,8 @@ public class SettingsManager : MonoBehaviour
 
     }
 
+
+
     /*
     private void PopulateUserCarousel()
     {
@@ -86,7 +88,13 @@ public class SettingsManager : MonoBehaviour
             }
         }
     }*/
+    public void CloseOptions()
+    {
+        settingsPNL.SetActive(false);
+        OptionsPNL.SetActive(false);
 
+
+    }
 
 
     // Piano size  options
