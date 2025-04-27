@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
+// Handles saving and loading the full list of users to/from a local JSON file.
 public static class UserDataManager
 {
     private static string savePath => Application.persistentDataPath + "/users.json";
@@ -31,5 +32,6 @@ public static class UserDataManager
         UserDataWrapper wrapper = JsonUtility.FromJson<UserDataWrapper>(json);
         return wrapper.users;
     }
+
 
 }

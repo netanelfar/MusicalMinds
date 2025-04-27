@@ -43,6 +43,14 @@ public class InputManager : MonoBehaviour
 
     void Update()
     {
+        for (int i = 0; i < 128; i++)
+        {
+            if (MidiMaster.GetKeyDown(i))
+            {
+                Debug.Log("Received MIDI Note: " + i);
+            }
+        }
+
         foreach (var entry in midiNoteMap)
         {
             int midiNote = entry.Key;

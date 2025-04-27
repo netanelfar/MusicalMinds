@@ -1,5 +1,7 @@
 using UnityEngine;
 
+// Manages the currently connected user 
+
 public static class UserManager
 {
     public static UserProfile CurrentUser { get; private set; }
@@ -9,13 +11,24 @@ public static class UserManager
     public static void SetCurrentUser(UserProfile user)
     {
         CurrentUser = user;
-        PlayerPrefs.SetString(LastUserKey, user.username);
-        PlayerPrefs.Save(); 
-        Debug.Log("Current user set to: " + user.username);
+
+        if (user != null)
+        {
+            PlayerPrefs.SetString(LastUserKey, user.username);
+        }
+        else
+        {
+            PlayerPrefs.DeleteKey(LastUserKey); // Clear last user if no user
+        }
+
+        PlayerPrefs.Save();
+        Debug.Log("Current user set to: " + (user != null ? user.username : "None"));
     }
 
+
+    // Returns the last connected user
     public static string GetLastConnectedUsername()
     {
-        return PlayerPrefs.GetString(LastUserKey, null); // Will return null if not found
+        return PlayerPrefs.GetString(LastUserKey, null); 
     }
 }

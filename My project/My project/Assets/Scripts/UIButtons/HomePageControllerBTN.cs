@@ -8,6 +8,7 @@ public class HomePageControllerBTN : MonoBehaviour
     public void LoadHomePage()
     {
         SceneManager.LoadScene("HomePageScene");
+        UserEditorService.SaveUserDitalesAfterGame();
     }
 
     //add points and reward update
