@@ -20,6 +20,11 @@ public class UserCarouselLoader : MonoBehaviour
     private int usersPerPage => userButtons.Count;
 
     public event Action<UserProfile> OnUserSelected;
+    public event Action<int> OnProfilePictureSelected;
+
+    private int selectedPictureIndex = -1;//
+
+
 
 
     private void Awake()
@@ -38,13 +43,14 @@ public class UserCarouselLoader : MonoBehaviour
             return; //  STOP! Do NOT setup user buttons if no users
         }
         //
-        string lastUsername = UserManager.GetLastConnectedUsername();
+        /*
+        string lastUsername = CurrentUserManager.GetLastConnectedUsername();
         if (!string.IsNullOrEmpty(lastUsername))
         {
             UserProfile lastUser = users.Find(u => u.username == lastUsername);
             if (lastUser != null)
             {
-                UserManager.SetCurrentUser(lastUser);
+                CurrentUserManager.SetCurrentUser(lastUser);
                 userDataProvider.UpdateUserDisplay();
             }
             else
@@ -56,7 +62,7 @@ public class UserCarouselLoader : MonoBehaviour
         else
         {
             userDataProvider.ClearUserDisplay();
-        }
+        }*/
 
         SetupUserButtons();
     }
@@ -155,4 +161,14 @@ public class UserCarouselLoader : MonoBehaviour
             SetupUserButtons();
         }
     }
+
+
+    ///////
+    private void HandleProfilePictureClicked(int pictureIndex)
+    {
+        selectedPictureIndex = pictureIndex;
+        //HighlightSelectedPicture();
+        OnProfilePictureSelected?.Invoke(pictureIndex); //  THIS is the bridge to UserProfileFormUI
+    }
+
 }

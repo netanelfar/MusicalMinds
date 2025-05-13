@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System;
 
 // Handles creating and saving new users
 public class UserProfileFormUI : MonoBehaviour
@@ -24,7 +25,9 @@ public class UserProfileFormUI : MonoBehaviour
     private bool isEditMode = false;
     private UserProfile userBeingEdited = null;
     private bool mustCreateUser = false;
-    private bool mustOpenCreateUserPanel = false; // NEW
+    private bool mustOpenCreateUserPanel = false;
+
+    public ProfilePictureCarouselLoader profilePicCarousel;
 
     void Awake()
     {
@@ -32,31 +35,63 @@ public class UserProfileFormUI : MonoBehaviour
         userSlotsLoader.OnUserSelected += HandleUserSelectedExternally;
 
         userDataProvider = GetComponent<UserDisplayUpdater>();
+
+        // Connect to carousel events - THIS IS CRITICAL for picture selection to work!
+        if (profilePicCarousel != null)
+        {
+            // Make sure we remove any existing handlers first to prevent duplicates
+            profilePicCarousel.OnProfilePictureSelected -= SelectProfilePicture;
+            profilePicCarousel.OnProfilePictureSelected += SelectProfilePicture;
+            // Initialize carousel when the component awakens
+            profilePicCarousel.SetupProfilePictureButtons();
+            Debug.Log("ProfilePictureCarousel connected successfully");
+        }
+        else
+        {
+            Debug.LogError("ProfilePictureCarousel reference is missing! Profile selection won't work correctly.");
+        }
+
+        // Keep the existing button setup for backward compatibility
+        for (int i = 0; i < profilePictureButtons.Count; i++)
+        {
+            int index = i; // capture correct index for each button
+            profilePictureButtons[i].onClick.RemoveAllListeners(); // prevent duplicates
+            profilePictureButtons[i].onClick.AddListener(() => SelectProfilePicture(index));
+        }
     }
 
     void Start()
     {
-        if (userDataProvider.Users == null || userDataProvider.Users.Count == 0)
+        userDataProvider.LoadUsers(); // Get latest data
+        var users = userDataProvider.Users;
+
+        string lastUsername = CurrentUserManager.GetLastConnectedUsername();
+        UserProfile lastUser = users.Find(u => u.username == lastUsername);
+
+        if (lastUser != null)
+        {
+            CurrentUserManager.SetCurrentUser(lastUser);
+            userDataProvider.UpdateUserDisplay();
+            settingsManager.ShowUsersOptions();
+        }
+        else if (users.Count == 0)
         {
             Debug.Log("No users found. Opening New User Panel...");
-
             mustCreateUser = true;
             mustOpenCreateUserPanel = true;
-
             settingsManager.ShowNewUsersPNL();
-            return;
+            settingsManager.SetUIInteractable(false);
         }
-
-        Debug.Log("Loaded users at Start:");
-        foreach (var user in userDataProvider.Users)
+        else
         {
-            Debug.Log("- " + user.username);
+            // Fallback: no saved user, but users exist
+            settingsManager.ShowUsersOptions();
+            userDataProvider.ClearUserDisplay();
         }
 
         userSlotsLoader.ReloadUserButtons();
         createUserPanel.SetActive(false);
     }
-
 
     void Update()
     {
@@ -76,8 +111,8 @@ public class UserProfileFormUI : MonoBehaviour
             isEditMode = false;
             userBeingEdited = null;
             usernameInput.text = "";
-            ProfileINDX = 0;
-            SelectProfilePicture(ProfileINDX);
+            ProfileINDX = 0; // Default to first profile picture
+            Debug.Log("Creating new user with default profile index: " + ProfileINDX);
         }
         else
         {
@@ -85,7 +120,17 @@ public class UserProfileFormUI : MonoBehaviour
             userBeingEdited = userToEdit;
             usernameInput.text = userToEdit.username;
             ProfileINDX = userToEdit.ProfileINDX;
-            SelectProfilePicture(ProfileINDX);
+            Debug.Log("Editing user with profile index: " + ProfileINDX);
+        }
+
+        // Make sure the carousel is updated to show correct selection
+        if (profilePicCarousel != null)
+        {
+            // Navigate to the page containing the profile picture
+            profilePicCarousel.NavigateToPageContainingIndex(ProfileINDX);
+
+            // Set the selected picture in the carousel
+            profilePicCarousel.SetSelectedPicture(ProfileINDX);
         }
 
         usernameInput.Select();
@@ -107,18 +152,20 @@ public class UserProfileFormUI : MonoBehaviour
             return;
         }
 
+        Debug.Log("Saving user with profile index: " + ProfileINDX);
+
         if (isEditMode)
         {
             UserEditorService.EditUser(userBeingEdited, username, ProfileINDX);
             UserDataManager.SaveUsers(userDataProvider.Users);
-            UserManager.SetCurrentUser(userBeingEdited);
+            CurrentUserManager.SetCurrentUser(userBeingEdited);
         }
         else
         {
             UserProfile newUser = UserEditorService.CreateNewUser(username, ProfileINDX);
             userDataProvider.Users.Add(newUser);
             UserDataManager.SaveUsers(userDataProvider.Users);
-            UserManager.SetCurrentUser(newUser);
+            CurrentUserManager.SetCurrentUser(newUser);
         }
 
         if (mustCreateUser)
@@ -126,10 +173,10 @@ public class UserProfileFormUI : MonoBehaviour
             mustCreateUser = false;
             settingsManager.SetUIInteractable(true);
         }
-        //
+
         createUserPanel.SetActive(false);
         usernameInput.text = "";
-//
+
         settingsManager.CloseOptions();
 
         userSlotsLoader.ReloadUserButtons();
@@ -138,13 +185,19 @@ public class UserProfileFormUI : MonoBehaviour
 
     public void SelectProfilePicture(int index)
     {
-        ProfileINDX = index;
-        Debug.Log("Selected profile picture: " + index);
+        ProfileINDX = index; // This is the CRUCIAL line that sets which profile pic to save
+        Debug.Log("Selected profile picture: " + index + " - ProfileINDX is now: " + ProfileINDX);
 
+        // Visually highlight the selected picture in carousel
+        if (profilePicCarousel != null)
+        {
+            profilePicCarousel.SetSelectedPicture(index);
+        }
+
+        // Also update your local buttons list if you're still using it
         for (int i = 0; i < profilePictureButtons.Count; i++)
         {
-            bool selected = i == index;
-            profilePictureButtons[i].interactable = !selected;
+            bool selected = i == index % profilePictureButtons.Count; // Use modulo to match displayed buttons
             profilePictureButtons[i].transform.localScale = selected ? Vector3.one * 1.2f : Vector3.one;
         }
     }
@@ -156,7 +209,7 @@ public class UserProfileFormUI : MonoBehaviour
             userDataProvider.Users.Remove(userBeingEdited);
             UserDataManager.SaveUsers(userDataProvider.Users);
 
-            UserManager.SetCurrentUser(null);
+            CurrentUserManager.SetCurrentUser(null);
             Debug.Log("User deleted.");
 
             createUserPanel.SetActive(false);
@@ -164,7 +217,7 @@ public class UserProfileFormUI : MonoBehaviour
             if (userDataProvider.Users.Count > 0)
             {
                 UserProfile fallbackUser = userDataProvider.Users[userDataProvider.Users.Count - 1];
-                UserManager.SetCurrentUser(fallbackUser);
+                CurrentUserManager.SetCurrentUser(fallbackUser);
                 settingsManager.ShowUsersOptions();
                 userSlotsLoader.ReloadUserButtons();
             }
@@ -183,7 +236,7 @@ public class UserProfileFormUI : MonoBehaviour
 
     private void HandleUserSelectedExternally(UserProfile user)
     {
-        UserManager.SetCurrentUser(user);
+        CurrentUserManager.SetCurrentUser(user);
         userDataProvider.UpdateUserDisplay();
     }
 

@@ -22,8 +22,11 @@ public static class UserEditorService
             preferredPianoSize = 25,
             preferredScreenSize = "1280x720",
             volume = 1f,
-            ProfileINDX = profileIndex
-        };
+            ProfileINDX = profileIndex,
+            Notelvl = 1,
+        
+        
+         };
     }
 
     // ---- Edit Profile ----
@@ -36,16 +39,16 @@ public static class UserEditorService
     // ---- Update Piano Size ----
     public static void UpdatePianoSize(int newSize)
     {
-        if (UserManager.CurrentUser == null) return;
+        if (CurrentUserManager.CurrentUser == null) return;
 
         // Update in-memory
-        UserManager.CurrentUser.preferredPianoSize = newSize;
+        CurrentUserManager.CurrentUser.preferredPianoSize = newSize;
 
         // Update in file
         List<UserProfile> allUsers = UserDataManager.LoadUsers();
         foreach (var user in allUsers)
         {
-            if (user.username == UserManager.CurrentUser.username)
+            if (user.username == CurrentUserManager.CurrentUser.username)
             {
                 user.preferredPianoSize = newSize;
                 break;
@@ -58,20 +61,47 @@ public static class UserEditorService
 
     public static void SaveUserDitalesAfterGame()
     {
-        if (UserManager.CurrentUser == null) return;
+        if (CurrentUserManager.CurrentUser == null) return;
 
         List<UserProfile> allUsers = UserDataManager.LoadUsers();
 
         foreach (var user in allUsers)
         {
-            if (user.username == UserManager.CurrentUser.username)
+            if (user.username == CurrentUserManager.CurrentUser.username)
             {
-                user.points = UserManager.CurrentUser.points;
+                user.points = CurrentUserManager.CurrentUser.points;
                 break;
             }
         }
 
         UserDataManager.SaveUsers(allUsers);
     }
+
+
+    public static void UpdateNoteRecognitionLevel(int newLevel)
+    {
+        if (CurrentUserManager.CurrentUser == null) return;
+
+        if (newLevel < 1 || newLevel > 3) return; // Only allow 1, 2, or 3 for now
+
+        // Update in-memory
+        CurrentUserManager.CurrentUser.Notelvl = newLevel;
+
+        // Update in file
+        List<UserProfile> allUsers = UserDataManager.LoadUsers();
+        foreach (var user in allUsers)
+        {
+            if (user.username == CurrentUserManager.CurrentUser.username)
+            {
+                user.Notelvl = newLevel;
+                break;
+            }
+        }
+
+        UserDataManager.SaveUsers(allUsers);
+    }
+
+
+
 
 }

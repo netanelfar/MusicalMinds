@@ -7,7 +7,7 @@ using System.Collections.Generic;
 public class UserDisplayUpdater : MonoBehaviour
 {
     [Header("Profile Pictures")] // Profile photos list
-    public List<Sprite> profilePictures; 
+    public List<Sprite> profilePictures;
 
     public List<UserProfile> Users { get; private set; } // Loaded users
 
@@ -28,23 +28,28 @@ public class UserDisplayUpdater : MonoBehaviour
 
     public void UpdateUserDisplay()
     {
-        if (UserManager.CurrentUser != null)
+        if (CurrentUserManager.CurrentUser != null)
         {
             usernameText.gameObject.SetActive(true);
             levelText.gameObject.SetActive(true);
             profileImage.gameObject.SetActive(true);
 
-            usernameText.text =  UserManager.CurrentUser.username;
-            levelText.text = "Level: " + UserManager.CurrentUser.level;
+            usernameText.text = CurrentUserManager.CurrentUser.username;
+            levelText.text = "Level: " + CurrentUserManager.CurrentUser.level;
 
-            int profileIndex = UserManager.CurrentUser.ProfileINDX;
+            int profileIndex = CurrentUserManager.CurrentUser.ProfileINDX;
+            Debug.Log("Trying to show profile index: " + profileIndex);
+            Debug.Log("Profile picture list count: " + profilePictures.Count);
+
             if (profileIndex >= 0 && profileIndex < profilePictures.Count)
             {
                 profileImage.sprite = profilePictures[profileIndex];
+                Debug.Log("Successfully set profile picture with index: " + profileIndex);
             }
             else
             {
-                profileImage.sprite = null;
+                Debug.LogWarning("Invalid profile index: " + profileIndex + ", using default");
+                profileImage.sprite = profilePictures.Count > 0 ? profilePictures[0] : null;
             }
         }
         else
@@ -53,12 +58,10 @@ public class UserDisplayUpdater : MonoBehaviour
         }
     }
 
-
     public void ClearUserDisplay()
     {
         usernameText.gameObject.SetActive(false);
         levelText.gameObject.SetActive(false);
         profileImage.gameObject.SetActive(false);
     }
-
 }

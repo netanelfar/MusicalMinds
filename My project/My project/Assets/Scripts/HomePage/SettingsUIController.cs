@@ -107,9 +107,9 @@ public class SettingsUIController : MonoBehaviour
     }
     public void OnEditButtonClicked()
     {
-        if (UserManager.CurrentUser != null)
+        if (CurrentUserManager.CurrentUser != null)
         {
-            OpenEditProfile(UserManager.CurrentUser);
+            OpenEditProfile(CurrentUserManager.CurrentUser);
         }
     }
 

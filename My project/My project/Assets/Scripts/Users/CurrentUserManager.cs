@@ -2,7 +2,7 @@ using UnityEngine;
 
 // Manages the currently connected user 
 
-public static class UserManager
+public static class CurrentUserManager
 {
     public static UserProfile CurrentUser { get; private set; }
 
@@ -31,4 +31,7 @@ public static class UserManager
     {
         return PlayerPrefs.GetString(LastUserKey, null); 
     }
+
+
+    
 }

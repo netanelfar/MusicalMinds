@@ -15,7 +15,7 @@ public class ProfilePictureCarouselLoader : MonoBehaviour
     [Header("Profile Pictures")]
     public List<Sprite> availableProfilePictures; // 13 available pictures
 
-    private int currentPageIndex = 0;
+    public int currentPageIndex = 0; // Made public so it can be accessed from other scripts
     private int picturesPerPage => profilePictureButtons.Count;
     private int selectedPictureIndex = -1;
 
@@ -32,7 +32,7 @@ public class ProfilePictureCarouselLoader : MonoBehaviour
 
         for (int i = 0; i < profilePictureButtons.Count; i++)
         {
-            Button button = profilePictureButtons[i];  
+            Button button = profilePictureButtons[i];
             Image pictureImage = button.transform.Find("ProfileIMG")?.GetComponent<Image>();
 
             int pictureIdx = startIdx + i;
@@ -58,13 +58,33 @@ public class ProfilePictureCarouselLoader : MonoBehaviour
         }
 
         UpdateNavigationButtons();
+        HighlightSelectedPicture(); // Make sure to highlight after setup
     }
 
     private void HandleProfilePictureClicked(int pictureIndex)
     {
+        Debug.LogWarning(">>> Picture clicked in carousel, index = " + pictureIndex);
+
         selectedPictureIndex = pictureIndex;
         HighlightSelectedPicture(); // Visual highlight
-        OnProfilePictureSelected?.Invoke(pictureIndex); // Notify listeners
+
+        // Make sure the event is fired with the correct index
+        if (OnProfilePictureSelected != null)
+        {
+            Debug.Log(">>> Firing OnProfilePictureSelected with index: " + pictureIndex);
+            OnProfilePictureSelected.Invoke(pictureIndex); // Notify listeners
+        }
+        else
+        {
+            Debug.LogError(">>> No listeners for OnProfilePictureSelected event!");
+        }
+    }
+
+    // This method can be called externally to set the selected picture
+    public void SetSelectedPicture(int pictureIndex)
+    {
+        selectedPictureIndex = pictureIndex;
+        HighlightSelectedPicture();
     }
 
     private void HighlightSelectedPicture()
@@ -80,9 +100,9 @@ public class ProfilePictureCarouselLoader : MonoBehaviour
             if (pictureImage != null)
             {
                 if (pictureIdx == selectedPictureIndex)
-                    pictureImage.color = Color.yellow; // Example: Yellow border
+                    pictureImage.color = Color.yellow; // Selected color
                 else
-                    pictureImage.color = Color.white; // Default
+                    pictureImage.color = Color.white; // Default color
             }
         }
     }
@@ -113,6 +133,17 @@ public class ProfilePictureCarouselLoader : MonoBehaviour
         if (currentPageIndex > 0)
         {
             currentPageIndex--;
+            SetupProfilePictureButtons();
+        }
+    }
+
+    // Helper method to navigate to the page containing a specific picture index
+    public void NavigateToPageContainingIndex(int pictureIndex)
+    {
+        int targetPage = pictureIndex / picturesPerPage;
+        if (targetPage != currentPageIndex)
+        {
+            currentPageIndex = targetPage;
             SetupProfilePictureButtons();
         }
     }

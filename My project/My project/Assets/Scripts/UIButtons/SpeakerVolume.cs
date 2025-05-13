@@ -14,11 +14,11 @@ public class SpeakerVolume : MonoBehaviour
 
     void Start()
     {
-        if (UserManager.CurrentUser != null)
+        if (CurrentUserManager.CurrentUser != null)
         {
-            AudioListener.volume = UserManager.CurrentUser.volume;
-            volumeSlider.value = UserManager.CurrentUser.volume;
-            Debug.Log(" speaker valume script: CurrentUser.preferredPianoSize " + UserManager.CurrentUser.preferredPianoSize);
+            AudioListener.volume = CurrentUserManager.CurrentUser.volume;
+            volumeSlider.value = CurrentUserManager.CurrentUser.volume;
+            Debug.Log(" speaker valume script: CurrentUser.preferredPianoSize " + CurrentUserManager.CurrentUser.preferredPianoSize);
 
            
         }
@@ -52,14 +52,14 @@ public class SpeakerVolume : MonoBehaviour
     {
         AudioListener.volume = value;
 
-        if (UserManager.CurrentUser != null)
+        if (CurrentUserManager.CurrentUser != null)
         {
-            UserManager.CurrentUser.volume = value;
+            CurrentUserManager.CurrentUser.volume = value;
 
             var users = UserDataManager.LoadUsers();
             foreach (var user in users)
             {
-                if (user.username == UserManager.CurrentUser.username)
+                if (user.username == CurrentUserManager.CurrentUser.username)
                 {
                     user.volume = value;
                     break;

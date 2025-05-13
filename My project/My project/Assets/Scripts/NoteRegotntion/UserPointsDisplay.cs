@@ -1,4 +1,5 @@
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class UserPointsDisplay : MonoBehaviour
@@ -17,9 +18,13 @@ public class UserPointsDisplay : MonoBehaviour
 
     void UpdatePointsText()
     {
-        if (PointsNumber != null && UserManager.CurrentUser != null)
+        if (PointsNumber != null && CurrentUserManager.CurrentUser != null)
         {
-            PointsNumber.text = UserManager.CurrentUser.points.ToString();
+            PointsNumber.text = CurrentUserManager.CurrentUser.points.ToString();
         }
     }
+
+    
+
+    
 }

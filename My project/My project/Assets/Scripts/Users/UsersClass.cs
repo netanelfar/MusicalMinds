@@ -15,6 +15,10 @@ public class UserProfile
     public float volume = 1f;
 
     public int ProfileINDX;
+
+    // Game settings
+    public int Notelvl; //note reacgontion level
+
 }
 
 
