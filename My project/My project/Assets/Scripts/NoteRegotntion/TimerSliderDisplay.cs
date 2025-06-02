@@ -60,6 +60,8 @@ public class TimerSliderDisplay : MonoBehaviour
         timerSlider.value = maxTime;
         isFilling = false;
     }
+  
+
 
     void Update()
     {

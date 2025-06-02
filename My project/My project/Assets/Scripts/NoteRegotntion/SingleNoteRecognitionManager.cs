@@ -18,6 +18,15 @@ public class SingleNoteRecognitionManager : MonoBehaviour
     
     private bool PausedByBTN = false;
     private bool PausedByPNl = false; //level panal
+    
+    private int notesAttempted = 0;
+    private int notesCorrect = 0;
+    private int notesPerLevel = 10;
+
+    public GameObject endOfLevelPanel; 
+    public TextMeshProUGUI CorrectNotesTXT;
+    public TextMeshProUGUI EndLevelFeedbackTXT;
+
 
 
 
@@ -118,13 +127,14 @@ public class SingleNoteRecognitionManager : MonoBehaviour
     }
 
 
-    public bool OnPlayerPressedNote(string note)
+    /*public bool OnPlayerPressedNote(string note)
     {
         if (!waitingForInput || isSystemPlayingNote)
             return false;
 
         if (note == targetNote)
         {
+            notesCorrect++;
             noteTimer.StopTimer();
             ShowFeedback("Correct!", Color.green);
             CalculatePointsAddition();
@@ -142,7 +152,95 @@ public class SingleNoteRecognitionManager : MonoBehaviour
             keyControl.ShakeKey(note);
             return false;
         }
+
+        if (notesAttempted >= notesPerLevel)
+        {
+            Invoke(nameof(ShowEndOfLevelPanel), 2f);
+        }
+        else
+        {
+            Invoke(nameof(PickRandomNote), 2f);
+        }
+
+        return note == targetNote;
+
+    }*/
+
+    public bool OnPlayerPressedNote(string note)
+    {
+        if (!waitingForInput || isSystemPlayingNote)
+            return false;
+
+        notesAttempted++;
+
+        if (note == targetNote)
+        {
+            notesCorrect++;
+            noteTimer.StopTimer();
+            ShowFeedback("Correct!", Color.green);
+            CalculatePointsAddition();
+
+            waitingForInput = false;
+            KeyControl.inputAllowed = false;
+            noteTimer.PlayFillAnimation();
+        }
+        else
+        {
+            wrongAttempts++;
+            StartCoroutine(ReplayTargetNote());
+            keyControl.ShakeKey(note);
+        }
+
+        if (notesAttempted >= notesPerLevel)
+        {
+            Invoke(nameof(ShowEndOfLevelPanel), 2f);
+        }
+        else if (note == targetNote)
+        {
+            Invoke(nameof(PickRandomNote), 2f);
+        }
+
+        return note == targetNote;
     }
+
+
+    private void ShowEndOfLevelPanel()
+    {
+        KeyControl.inputAllowed = false;
+        waitingForInput = false;
+        isSystemPlayingNote = false;
+
+        noteTimer.StopTimer();
+        StopAllCoroutines(); // Stops ReplayTargetNote if it's running
+        CancelInvoke(nameof(PickRandomNote)); // Just in case a delayed note is scheduled
+
+        if (CorrectNotesTXT != null)
+        {
+            CorrectNotesTXT.text = $"{notesCorrect}/{notesPerLevel}";
+            EndLevelFeedbackTXT.text = $"{ GetEndOfLevelMessage() }";
+        }
+
+        endOfLevelPanel.SetActive(true);
+    }
+
+
+
+    public void RestartLevel()
+    {
+        endOfLevelPanel.SetActive(false);
+        notesAttempted = 0;
+        notesCorrect = 0;
+        waitingForInput = false;
+        isSystemPlayingNote = false;
+        KeyControl.inputAllowed = false;
+
+        StopAllCoroutines();
+        CancelInvoke();
+
+        ClearFeedback();
+        Invoke(nameof(PickRandomNote), 1f);
+    }
+
 
     private void HandleTimeOut()
     {
@@ -253,6 +351,7 @@ public class SingleNoteRecognitionManager : MonoBehaviour
 
     /////
     ///
+    /*
     public void ToggleLevelPanal()
     {
         bool isActive = levelPNL.activeSelf;
@@ -276,9 +375,90 @@ public class SingleNoteRecognitionManager : MonoBehaviour
 
         // Optional feedback
         Debug.Log("Note level changed to: " + level);
+        RestartLevel();
 
+
+    }*/
+
+    public void ToggleLevelPanal()
+    {
+        bool isActive = levelPNL.activeSelf;
+        levelPNL.SetActive(!isActive);
+
+        // Update the pause manager about level panel state
+        NoteRecognitionPauseManager pauseManager = FindObjectOfType<NoteRecognitionPauseManager>();
+        if (pauseManager != null)
+        {
+            pauseManager.SetLevelPanelPause(!isActive); // !isActive because we just toggled it
+        }
     }
 
+    public void SetLevel(int level)
+    {
+        // Stop all current game activity first
+        waitingForInput = false;
+        isSystemPlayingNote = false;
+        KeyControl.inputAllowed = false;
 
+        // Stop timer and any running coroutines
+        noteTimer?.StopTimer();
+        StopAllCoroutines();
+        CancelInvoke();
+
+        // Clear feedback
+        ClearFeedback();
+
+        // Update user level
+        UserEditorService.UpdateNoteRecognitionLevel(level);
+
+        // Close the level panel and update pause state
+        levelPNL.SetActive(false);
+        NoteRecognitionPauseManager pauseManager = FindObjectOfType<NoteRecognitionPauseManager>();
+        if (pauseManager != null)
+        {
+            pauseManager.SetLevelPanelPause(false); // Level panel is now closed
+        }
+
+        // Reset level progress
+        notesAttempted = 0;
+        notesCorrect = 0;
+        wrongAttempts = 0;
+
+        // Fill the timer to show fresh start
+        noteTimer?.PlayFillAnimation(0.5f);
+
+        // Optional feedback
+        Debug.Log("Note level changed to: " + level);
+
+        // Start new level after a short delay to let the fill animation show
+        Invoke(nameof(PickRandomNote), 1f);
+    }
+
+    private string GetEndOfLevelMessage()
+    {
+        float successRatio = (float)notesCorrect / notesPerLevel;
+
+        List<string> lowSuccessMessages = new List<string>
+    {
+        "Nice try!", "Good practice!", "You're learning!", "Keep going!", "Don't give up!"
+    };
+
+        List<string> mediumSuccessMessages = new List<string>
+    {
+        "Well done!", "You're getting better!", "Keep it up!", "You're doing great!", "Almost there!"
+    };
+
+        List<string> highSuccessMessages = new List<string>
+    {
+        "Amazing!", "Fantastic job!", "Super star!", "You nailed it!", "Perfect!"
+    };
+
+        if (successRatio <= 1f / 3f)
+            return lowSuccessMessages[Random.Range(0, lowSuccessMessages.Count)];
+        else if (successRatio <= 2f / 3f)
+            return mediumSuccessMessages[Random.Range(0, mediumSuccessMessages.Count)];
+        else
+            return highSuccessMessages[Random.Range(0, highSuccessMessages.Count)];
+    }
 
 }

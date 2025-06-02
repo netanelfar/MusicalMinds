@@ -13,5 +13,13 @@ public class MainMenuLoader : MonoBehaviour
         SceneManager.LoadScene("NoteRecognition");
     }
 
-    
+    public void LoadTEMPscne()
+    {
+        SceneManager.LoadScene("TEMPgame");
+    }
+
+    public void LoadTEMPGamescne()
+    {
+        SceneManager.LoadScene("TEMPgame");
+    }
 }
