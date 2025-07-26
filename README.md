@@ -17,6 +17,10 @@ https://docs.google.com/presentation/d/1FV6yUx3G3guKdPu3DhYf1CPAUwKv_oiZwUifOh7r
 
 Phase B
 
-book
+book:
 
 https://docs.google.com/document/d/1n9-i_z61lC6T5BGBR86jEbx1dkDM_Zk5O65mzV-cRn0/edit?tab=t.0
+
+link to the showcase video:
+
+https://drive.google.com/file/d/1Jb7F3PXikq9wgv9jlxo4YPcWC1KUv_4n/view?usp=drive_link
