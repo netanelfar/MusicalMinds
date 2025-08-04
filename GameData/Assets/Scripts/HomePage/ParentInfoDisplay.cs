@@ -41,7 +41,7 @@ public class ParentInfoDisplay : MonoBehaviour
             }
         }
 
-        usernameText.text = $"User: {user.username}"; 
+        usernameText.text = $"{user.username}"; 
         totalPointsText.text = $"Points: {user.points}";
         levelText.text = $"Level: {user.level}";
         freePlayText.text = $"{user.freePlayCounter}";

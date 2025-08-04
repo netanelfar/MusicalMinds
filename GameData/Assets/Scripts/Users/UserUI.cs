@@ -236,10 +236,28 @@ public class UserUI : MonoBehaviour
         inputCheckTEXT.text = "";
         if (isEditMode)
         {
-            // Edit existing user
+            
+             string originalUsername = userBeingEdited.username; // Store original username
+            Debug.Log($"Editing user: {originalUsername} -> {username}, Profile: {selectedProfileIndex}");
+
+            // Update the user object
             UserManager.EditUser(userBeingEdited, username, selectedProfileIndex);
-            UserManager.SaveUsers(Users);
+
+            // Manually update the user in the file using the original username
+            List<UserProfile> allUsers = UserManager.LoadUsers();
+            for (int i = 0; i < allUsers.Count; i++)
+            {
+                if (allUsers[i].username == originalUsername) // Find by original username
+                {
+                    allUsers[i] = userBeingEdited; // Replace with updated user
+                    break;
+                }
+            }
+            UserManager.SaveUsers(allUsers);
+
+            // Set as current user and reload local list
             UserManager.SetCurrentUser(userBeingEdited);
+            LoadUsers();
         }
         else
         {
