@@ -1965,7 +1965,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PointsNumber: {fileID: 1873176813}
   LevelText: {fileID: 1764933826}
-  levelUpEffect: {fileID: 0}
 --- !u!114 &454529834
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4384,10 +4383,10 @@ RectTransform:
   - {fileID: 1407433235}
   m_Father: {fileID: 838411610}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 103.73, y: -37.51}
-  m_SizeDelta: {x: -826.37, y: -491.09}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 103.73001, y: -37.51001}
+  m_SizeDelta: {x: 1231.63, y: 516.91003}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &982162483
 MonoBehaviour:
@@ -4463,10 +4462,10 @@ RectTransform:
   - {fileID: 1227131153}
   m_Father: {fileID: 982162482}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -14.999985}
-  m_SizeDelta: {x: -60, y: -90}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: -15}
+  m_SizeDelta: {x: 1172, y: 426}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1028943960
 MonoBehaviour:
@@ -5953,7 +5952,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -14.999985}
+  m_AnchoredPosition: {x: 0, y: -15}
   m_SizeDelta: {x: -60, y: -90}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1407433236

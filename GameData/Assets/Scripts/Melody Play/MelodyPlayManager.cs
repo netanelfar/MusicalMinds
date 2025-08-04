@@ -10,6 +10,10 @@ public class MelodyPlayManager : MonoBehaviour
     public GameObject mapPanel;
     public GameObject stepCompletedPanel;
 
+    [Header("Next Step")]
+    public GameObject nextBTN;
+    public GameObject nextTXT;
+
     [Header("Component References")]
     public KeyControl keyControl;
     public FeedbackManager feedbackManager;
@@ -243,6 +247,7 @@ public class MelodyPlayManager : MonoBehaviour
         if (stepCompletedPanel != null)
         {
             stepCompletedPanel.SetActive(true);
+            bool isFinalLevel = (currentStepIndex >= currentSong.steps.Count - 1);
 
             // Show challenge button starting from second step.
             if (challengeButton != null)
@@ -256,37 +261,46 @@ public class MelodyPlayManager : MonoBehaviour
 
             if (feedbackManager != null && endOfLevelText != null && currentExpectedNotes != null)
             {
-                Debug.Log($"Challenge completed! Earned {sessionPoints} points total");
-                string message = feedbackManager.GetEndOfLevelMessage(1, 1);
+                string message;
+                if (isFinalLevel)
+                {
+                    nextBTN.SetActive(false);
+                    nextTXT.SetActive(false);
+                    message = $"You've mastered '{currentSong.name}'";
+
+                }
+                else
+                {
+                    Debug.Log($"Challenge completed! Earned {sessionPoints} points total");
+                     message = feedbackManager.GetEndOfLevelMessage(1, 1);
+                    //endOfLevelText.text = message;
+                    nextBTN.SetActive(true);
+                    nextTXT.SetActive(true);
+
+
+                }
                 endOfLevelText.text = message;
+
             }
         }
         sessionPoints = 0;
         yield break;
     }
 
-    // Manully restarts step
-    /*
-    public void OnRestartStepButtonPressed()
-    {
-        StartCoroutine(RestartStep());
-    }
-    */
-
+    // Restarts the current step from the beginning.
     public void OnRestartButtonPressed()
     {
-        // Just reset and use your existing PlayCurrentStep logic!
         ResetInputState();
 
         if (isInChallengeMode)
         {
-            // Set the flag to replay the melody
             isSystemPlayingChallenge = true;
         }
 
-        PlayCurrentStep(); // This already handles both modes
+        PlayCurrentStep(); 
     }
 
+    // Resets game state and closes completion panel.
     private void ResetInputState()
     {
         StopAllCoroutines();
@@ -295,10 +309,8 @@ public class MelodyPlayManager : MonoBehaviour
         SetInputState(false);
         if (stepCompletedPanel != null)
             stepCompletedPanel.SetActive(false);
-    }/// <summary>
-    /// //
-    /// </summary>
-    /// <returns></returns>
+    }
+
     // Restarts current step 
     private IEnumerator RestartStep()
     {

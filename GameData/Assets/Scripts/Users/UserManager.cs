@@ -150,7 +150,7 @@ public static class UserManager
         bool removed = false;
         if (userInList != null)
         {
-            removed = allUsers.Remove(userInList); ///// unused?
+            removed = allUsers.Remove(userInList); ///// 
         }
 
         SaveUsers(allUsers);
